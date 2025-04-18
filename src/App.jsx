@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../supabase";
 
 export default function SewingPatternManager() {
   const [patterns, setPatterns] = useState([]);
@@ -19,6 +20,19 @@ export default function SewingPatternManager() {
     setPatterns((prev) => [...prev, { ...form, id: Date.now() }]);
     setForm({ name: "", designer: "", type: "", tags: "", notes: "" });
   };
+
+  useEffect(() => {
+    const testConnection = async () => {
+      const { data, error } = await supabase.from('patterns').select('*')
+      if (error) {
+        console.error('❌ Supabase error:', error.message)
+      } else {
+        console.log('✅ Connected to Supabase — patterns:', data)
+      }
+    }
+
+    testConnection()
+  }, [])
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -78,6 +92,10 @@ export default function SewingPatternManager() {
             <p className="mt-2 text-sm whitespace-pre-wrap">{p.notes}</p>
           </div>
         ))}
+      </div>
+
+      <div className="p-4">
+        Check the browser console for Supabase test.
       </div>
     </div>
   );

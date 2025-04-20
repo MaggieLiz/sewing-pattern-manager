@@ -1,96 +1,20 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import PatternsList from '../pages/PatternsList'
+import AddPattern from '../pages/AddPattern'
 
-export default function SewingPatternManager() {
-  const [patterns, setPatterns] = useState([])
-  const [form, setForm] = useState({
-    name: '',
-    designer: '',
-    type: '',
-    tags: '',
-    notes: '',
-  })
-
-  useEffect(() => {
-    const fetchPatterns = async () => {
-      const { data, error } = await supabase.from('patterns').select('*').order('created_at', { ascending: false })
-      if (error) console.error('Supabase fetch error:', error.message)
-      else setPatterns(data)
-    }
-    fetchPatterns()
-  }, [])
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleAdd = async () => {
-    if (!form.name || !form.designer) return
-    const { data, error } = await supabase.from('patterns').insert([form]).select()
-    if (error) return console.error('Supabase insert error:', error.message)
-    setPatterns((prev) => [data[0], ...prev])
-    setForm({ name: '', designer: '', type: '', tags: '', notes: '' })
-  }
-
+export default function App() {
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Sewing Pattern Manager</h1>
-
-      <div className="grid gap-4 mb-6">
-        <input
-          name="name"
-          placeholder="Pattern Name"
-          value={form.name}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <input
-          name="designer"
-          placeholder="Designer"
-          value={form.designer}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <input
-          name="type"
-          placeholder="Type (e.g., dress, top)"
-          value={form.type}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <input
-          name="tags"
-          placeholder="Tags (comma-separated)"
-          value={form.tags}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <textarea
-          name="notes"
-          placeholder="Notes about usage, fit, mods, etc."
-          value={form.notes}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        />
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Add Pattern
-        </button>
+    <Router>
+      <div className="p-6 max-w-4xl mx-auto">
+        <nav className="flex gap-4 mb-6">
+          <Link to="/" className="text-blue-600 hover:underline">View Patterns</Link>
+          <Link to="/add" className="text-blue-600 hover:underline">Add Pattern</Link>
+        </nav>
+        <Routes>
+          <Route path="/" element={<PatternsList />} />
+          <Route path="/add" element={<AddPattern />} />
+        </Routes>
       </div>
-
-      <div className="grid gap-4">
-        {patterns.map((p) => (
-          <div key={p.id} className="border rounded p-4 shadow">
-            <h2 className="font-semibold text-xl">{p.name}</h2>
-            <p className="text-sm text-gray-600">by {p.designer}</p>
-            <p className="mt-2 text-sm">Type: {p.type}</p>
-            <p className="text-sm">Tags: {p.tags}</p>
-            <p className="mt-2 text-sm whitespace-pre-wrap">{p.notes}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    </Router>
   )
 }

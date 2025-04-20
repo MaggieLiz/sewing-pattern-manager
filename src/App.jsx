@@ -1,38 +1,36 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../supabase";
+import { useEffect, useState } from 'react';
+import { supabase } from '../supabase';
 
 export default function SewingPatternManager() {
-  const [patterns, setPatterns] = useState([]);
+  const [patterns, setPatterns] = useState([])
   const [form, setForm] = useState({
-    name: "",
-    designer: "",
-    type: "",
-    tags: "",
-    notes: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleAdd = () => {
-    if (!form.name || !form.designer) return;
-    setPatterns((prev) => [...prev, { ...form, id: Date.now() }]);
-    setForm({ name: "", designer: "", type: "", tags: "", notes: "" });
-  };
+    name: '',
+    designer: '',
+    type: '',
+    tags: '',
+    notes: '',
+  })
 
   useEffect(() => {
-    const testConnection = async () => {
-      const { data, error } = await supabase.from('patterns').select('*')
-      if (error) {
-        console.error('❌ Supabase error:', error.message)
-      } else {
-        console.log('✅ Connected to Supabase — patterns:', data)
-      }
+    const fetchPatterns = async () => {
+      const { data, error } = await supabase.from('patterns').select('*').order('created_at', { ascending: false })
+      if (error) console.error('Supabase fetch error:', error.message)
+      else setPatterns(data)
     }
-
-    testConnection()
+    fetchPatterns()
   }, [])
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleAdd = async () => {
+    if (!form.name || !form.designer) return
+    const { data, error } = await supabase.from('patterns').insert([form]).select()
+    if (error) return console.error('Supabase insert error:', error.message)
+    setPatterns((prev) => [data[0], ...prev])
+    setForm({ name: '', designer: '', type: '', tags: '', notes: '' })
+  }
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -93,11 +91,6 @@ export default function SewingPatternManager() {
           </div>
         ))}
       </div>
-
-      <div className="p-4">
-        Check the browser console for Supabase test.
-      </div>
     </div>
-  );
+  )
 }
-

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 
+const PATTERN_TYPES = ['Dress', 'Top', 'Bottom', 'Skirt', 'Outerwear', 'Accessory']
+
 export default function AddPattern() {
-  const [form, setForm] = useState({
-    name: '', designer: '', type: '', tags: '', notes: ''
-  })
+  const [form, setForm] = useState({ name: '', designer: '', type: '', tags: '', notes: '' })
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -20,51 +20,66 @@ export default function AddPattern() {
 
   return (
     <div className="grid gap-4">
-      <input
-  name="name"
-  placeholder="Pattern Name"
-  autoComplete="off"
-  value={form.name}
-  onChange={handleChange}
-  className="border p-2 rounded"
-/>
-
-<input
-  name="designer"
-  placeholder="Designer"
-  autoComplete="organization"
-  value={form.designer}
-  onChange={handleChange}
-  className="border p-2 rounded"
-/>
-
-<input
-  name="type"
-  placeholder="Type (e.g., dress, top)"
-  autoComplete="off"
-  value={form.type}
-  onChange={handleChange}
-  className="border p-2 rounded"
-/>
-
-<input
-  name="tags"
-  placeholder="Tags (comma-separated)"
-  autoComplete="off"
-  value={form.tags}
-  onChange={handleChange}
-  className="border p-2 rounded"
-/>
-
-<textarea
-  name="notes"
-  placeholder="Notes about usage, fit, mods, etc."
-  autoComplete="off"
-  value={form.notes}
-  onChange={handleChange}
-  className="border p-2 rounded"
-/>
-      <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add Pattern</button>
+      <div>
+        <label className="block font-semibold">Pattern Name</label>
+        <input
+          name="name"
+          placeholder="Pattern Name"
+          value={form.name}
+          onChange={handleChange}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Designer</label>
+        <input
+          name="designer"
+          placeholder="Designer"
+          value={form.designer}
+          onChange={handleChange}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Type</label>
+        <select
+          name="type"
+          value={form.type}
+          onChange={handleChange}
+          className="border p-2 rounded w-full"
+        >
+          <option value="">Select Type</option>
+          {PATTERN_TYPES.map((type) => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="block font-semibold">Tags</label>
+        <input
+          name="tags"
+          placeholder="Tags (comma-separated)"
+          value={form.tags}
+          onChange={handleChange}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Notes</label>
+        <textarea
+          name="notes"
+          placeholder="Notes about usage, fit, mods, etc."
+          value={form.notes}
+          onChange={handleChange}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+      <button
+        onClick={handleAdd}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Add Pattern
+      </button>
     </div>
   )
 }

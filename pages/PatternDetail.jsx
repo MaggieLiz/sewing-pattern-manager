@@ -2,6 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 
+const PATTERN_TYPES = ['Dress', 'Top', 'Bottom', 'Skirt', 'Outerwear', 'Accessory']
+
 export default function PatternDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -46,16 +48,36 @@ export default function PatternDetail() {
   return (
     <div className="space-y-4">
       {editing ? (
-        <>
-          <input name="name" value={form.name} onChange={handleChange} className="border p-2 rounded w-full" />
-          <input name="designer" value={form.designer} onChange={handleChange} className="border p-2 rounded w-full" />
-          <input name="type" value={form.type} onChange={handleChange} className="border p-2 rounded w-full" />
-          <input name="tags" value={form.tags} onChange={handleChange} className="border p-2 rounded w-full" />
-          <textarea name="notes" value={form.notes} onChange={handleChange} className="border p-2 rounded w-full" />
+        <div className="space-y-4">
+          <div>
+            <label className="block font-semibold">Pattern Name</label>
+            <input name="name" value={form.name} onChange={handleChange} className="border p-2 rounded w-full" />
+          </div>
+          <div>
+            <label className="block font-semibold">Designer</label>
+            <input name="designer" value={form.designer} onChange={handleChange} className="border p-2 rounded w-full" />
+          </div>
+          <div>
+            <label className="block font-semibold">Type</label>
+            <select name="type" value={form.type} onChange={handleChange} className="border p-2 rounded w-full">
+              <option value="">Select Type</option>
+              {PATTERN_TYPES.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block font-semibold">Tags</label>
+            <input name="tags" value={form.tags} onChange={handleChange} className="border p-2 rounded w-full" />
+          </div>
+          <div>
+            <label className="block font-semibold">Notes</label>
+            <textarea name="notes" value={form.notes} onChange={handleChange} className="border p-2 rounded w-full" />
+          </div>
 
           <button onClick={handleUpdate} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save</button>
           <button onClick={() => setEditing(false)} className="px-4 py-2 ml-2 bg-gray-300 rounded">Cancel</button>
-        </>
+        </div>
       ) : (
         <>
           <h1 className="text-2xl font-bold">{pattern.name}</h1>
@@ -72,5 +94,3 @@ export default function PatternDetail() {
     </div>
   )
 }
-
-

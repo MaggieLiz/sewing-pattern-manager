@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabase'
+import { Link } from 'react-router-dom'
 
 export default function PatternsList() {
   const [patterns, setPatterns] = useState([])
@@ -36,15 +37,20 @@ export default function PatternsList() {
       />
 
       <div className="grid gap-4">
-        {filtered.map((p) => (
-          <div key={p.id} className="border rounded p-4 shadow">
-            <h2 className="font-semibold text-xl">{p.name}</h2>
-            <p className="text-sm text-gray-600">by {p.designer}</p>
-            <p className="mt-2 text-sm">Type: {p.type}</p>
-            <p className="text-sm">Tags: {p.tags}</p>
-            <p className="mt-2 text-sm whitespace-pre-wrap">{p.notes}</p>
-          </div>
-        ))}
+      {filtered.map((p) => (
+        <div key={p.id} className="border rounded p-4 shadow">
+          <Link
+            to={`/pattern/${p.id}`}
+            className="text-xl font-semibold text-blue-600 hover:underline"
+          >
+            {p.name}
+          </Link>
+          <p className="text-sm text-gray-600">by {p.designer}</p>
+          <p className="text-sm">Type: {p.type}</p>
+          <p className="text-sm">Tags: {p.tags}</p>
+          <p className="mt-2 text-sm whitespace-pre-wrap">{p.notes}</p>
+        </div>
+      ))}
       </div>
     </div>
   )

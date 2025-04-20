@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import PatternsList from '../pages/PatternsList'
 import AddPattern from '../pages/AddPattern'
+import PatternDetail from '../pages/PatternDetail'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<PatternsList />} />
           <Route path="/add" element={<AddPattern />} />
+          <Route path="/pattern/:id" element={<PatternDetail />} />
         </Routes>
       </div>
     </Router>

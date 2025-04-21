@@ -5,17 +5,40 @@ const PATTERN_TYPES = ['Dress', 'Top', 'Bottom', 'Skirt', 'Outerwear', 'Accessor
 
 export default function AddPattern() {
   const [form, setForm] = useState({ name: '', designer: '', type: '', tags: '', notes: '' })
+  const [imageFile, setImageFile] = useState(null)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0])
+  }
+
   const handleAdd = async () => {
     if (!form.name || !form.designer) return
-    const { error } = await supabase.from('patterns').insert([form])
+
+    let imageUrl = ''
+    if (imageFile) {
+      const fileExt = imageFile.name.split('.').pop()
+      const filePath = `patterns/${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase
+        .storage
+        .from('pattern-images') // make sure this matches your bucket name in Supabase
+        .upload(filePath, imageFile)
+
+      if (uploadError) return console.error('Image upload failed:', uploadError.message)
+
+      const { data: urlData } = supabase.storage.from('pattern-images').getPublicUrl(filePath)
+      imageUrl = urlData.publicUrl
+    }
+
+    const { error } = await supabase.from('patterns').insert([{ ...form, image_url: imageUrl }])
     if (error) return console.error('Supabase insert error:', error.message)
     alert('Pattern added!')
     setForm({ name: '', designer: '', type: '', tags: '', notes: '' })
+    setImageFile(null)
   }
 
   return (
@@ -71,6 +94,15 @@ export default function AddPattern() {
           placeholder="Notes about usage, fit, mods, etc."
           value={form.notes}
           onChange={handleChange}
+          className="border p-2 rounded w-full"
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Upload Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
           className="border p-2 rounded w-full"
         />
       </div>

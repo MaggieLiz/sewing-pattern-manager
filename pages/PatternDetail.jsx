@@ -85,7 +85,13 @@ export default function PatternDetail() {
           <p>Type: {pattern.type}</p>
           <p>Tags: {pattern.tags}</p>
           <p className="whitespace-pre-wrap">{pattern.notes}</p>
-
+          {pattern.image_url && (
+          <img
+            src={pattern.image_url}
+            alt={pattern.name}
+            className="w-60 rounded-xl shadow mb-4"
+        />
+        )}
           <button onClick={() => setEditing(true)} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Edit</button>
         </>
       )}

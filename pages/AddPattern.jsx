@@ -6,13 +6,10 @@ const PATTERN_TYPES = ['Dress', 'Top', 'Bottom', 'Skirt', 'Outerwear', 'Accessor
 export default function AddPattern() {
   const [form, setForm] = useState({ name: '', designer: '', type: '', tags: '', notes: '' })
   const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleImageChange = (e) => {
-    setImageFile(e.target.files[0])
   }
 
   const handleAdd = async () => {
@@ -25,10 +22,13 @@ export default function AddPattern() {
 
       const { error: uploadError } = await supabase
         .storage
-        .from('pattern-images') // make sure this matches your bucket name in Supabase
+        .from('pattern-images')
         .upload(filePath, imageFile)
 
-      if (uploadError) return console.error('Image upload failed:', uploadError.message)
+      if (uploadError) {
+        console.error('Image upload failed:', uploadError.message)
+        return
+      }
 
       const { data: urlData } = supabase.storage.from('pattern-images').getPublicUrl(filePath)
       imageUrl = urlData.publicUrl
@@ -36,9 +36,11 @@ export default function AddPattern() {
 
     const { error } = await supabase.from('patterns').insert([{ ...form, image_url: imageUrl }])
     if (error) return console.error('Supabase insert error:', error.message)
+
     alert('Pattern added!')
     setForm({ name: '', designer: '', type: '', tags: '', notes: '' })
     setImageFile(null)
+    setImagePreview(null)
   }
 
   return (
@@ -47,7 +49,6 @@ export default function AddPattern() {
         <label className="block font-semibold">Pattern Name</label>
         <input
           name="name"
-          placeholder="Pattern Name"
           value={form.name}
           onChange={handleChange}
           className="border p-2 rounded w-full"
@@ -57,7 +58,6 @@ export default function AddPattern() {
         <label className="block font-semibold">Designer</label>
         <input
           name="designer"
-          placeholder="Designer"
           value={form.designer}
           onChange={handleChange}
           className="border p-2 rounded w-full"
@@ -81,7 +81,6 @@ export default function AddPattern() {
         <label className="block font-semibold">Tags</label>
         <input
           name="tags"
-          placeholder="Tags (comma-separated)"
           value={form.tags}
           onChange={handleChange}
           className="border p-2 rounded w-full"
@@ -91,7 +90,6 @@ export default function AddPattern() {
         <label className="block font-semibold">Notes</label>
         <textarea
           name="notes"
-          placeholder="Notes about usage, fit, mods, etc."
           value={form.notes}
           onChange={handleChange}
           className="border p-2 rounded w-full"
@@ -102,10 +100,19 @@ export default function AddPattern() {
         <input
           type="file"
           accept="image/*"
-          onChange={handleImageChange}
-          className="border p-2 rounded w-full"
+          onChange={(e) => {
+            const file = e.target.files[0]
+            if (file) {
+              setImageFile(file)
+              setImagePreview(URL.createObjectURL(file))
+            }
+          }}
+          className="w-full"
         />
       </div>
+      {imagePreview && (
+        <img src={imagePreview} alt="Preview" className="w-40 mt-2 rounded-lg shadow" />
+      )}
       <button
         onClick={handleAdd}
         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

@@ -49,6 +49,13 @@ export default function PatternsList() {
           <p className="text-sm">Type: {p.type}</p>
           <p className="text-sm">Tags: {p.tags}</p>
           <p className="mt-2 text-sm whitespace-pre-wrap">{p.notes}</p>
+          {p.image_url && (
+          <img
+            src={p.image_url}
+            alt={p.name}
+            className="w-60 rounded-xl shadow mb-4"
+          />
+          )}
         </div>
       ))}
       </div>

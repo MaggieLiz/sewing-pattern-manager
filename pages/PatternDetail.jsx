@@ -11,6 +11,7 @@ export default function PatternDetail() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({ name: '', designer: '', type: '', tags: '', notes: '' })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const fetchPattern = async () => {
@@ -26,15 +27,22 @@ export default function PatternDetail() {
   }, [id])
 
   const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this pattern?')) return
     const { error } = await supabase.from('patterns').delete().eq('id', id)
     if (error) return console.error('Delete failed:', error.message)
-    navigate('/')
+    navigate('/patterns')
   }
 
   const handleUpdate = async () => {
-    const { error } = await supabase.from('patterns').update(form).eq('id', id)
+    setSaving(true)
+    const updateData = {
+      ...form,
+      updated_at: new Date().toISOString()
+    }
+    const { error } = await supabase.from('patterns').update(updateData).eq('id', id)
+    setSaving(false)
     if (error) return console.error('Update failed:', error.message)
-    setPattern(form)
+    setPattern(updateData)
     setEditing(false)
   }
 
@@ -75,7 +83,13 @@ export default function PatternDetail() {
             <textarea name="notes" value={form.notes} onChange={handleChange} className="border p-2 rounded w-full" />
           </div>
 
-          <button onClick={handleUpdate} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save</button>
+          <button
+            onClick={handleUpdate}
+            disabled={saving}
+            className={`px-4 py-2 rounded ${saving ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'} text-white`}
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </button>
           <button onClick={() => setEditing(false)} className="px-4 py-2 ml-2 bg-gray-300 rounded">Cancel</button>
         </div>
       ) : (
@@ -83,15 +97,32 @@ export default function PatternDetail() {
           <h1 className="text-2xl font-bold">{pattern.name}</h1>
           <p className="text-sm text-gray-600">by {pattern.designer}</p>
           <p>Type: {pattern.type}</p>
-          <p>Tags: {pattern.tags}</p>
+          <p>
+            Tags:{' '}
+            {pattern.tags
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+              .map((tag, i) => (
+                <span key={i} className="inline-block bg-gray-200 text-sm px-2 py-1 rounded mr-2">
+                  {tag}
+                </span>
+              ))}
+          </p>
           <p className="whitespace-pre-wrap">{pattern.notes}</p>
           {pattern.image_url && (
-          <img
-            src={pattern.image_url}
-            alt={pattern.name}
-            className="w-60 rounded-xl shadow mb-4"
-        />
-        )}
+            <img
+              src={pattern.image_url}
+              alt={pattern.name}
+              className="w-60 rounded-xl shadow mb-4"
+            />
+          )}
+          <p className="text-sm text-gray-500">
+            Added: {pattern.created_at ? new Date(pattern.created_at).toLocaleDateString() : 'N/A'}
+          </p>
+          <p className="text-sm text-gray-500">
+            Last Updated: {pattern.updated_at ? new Date(pattern.updated_at).toLocaleDateString() : 'N/A'}
+          </p>
           <button onClick={() => setEditing(true)} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Edit</button>
         </>
       )}

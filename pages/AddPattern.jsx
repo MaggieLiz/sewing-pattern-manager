@@ -12,31 +12,53 @@ export default function AddPattern() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleAdd = async () => {
-    if (!form.name || !form.designer) return
+  const [loading, setLoading] = useState(false)
 
+  const handleAdd = async () => {
+    if (!form.name || !form.designer) {
+      alert("Please fill in at least the pattern name and designer.")
+      return
+    }
+  
+    setLoading(true)
+  
     let imageUrl = ''
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop()
       const filePath = `patterns/${Date.now()}.${fileExt}`
-
+  
       const { error: uploadError } = await supabase
         .storage
         .from('pattern-images')
         .upload(filePath, imageFile)
-
+  
       if (uploadError) {
         console.error('Image upload failed:', uploadError.message)
+        alert('Image upload failed.')
+        setLoading(false)
         return
       }
-
-      const { data: urlData } = supabase.storage.from('pattern-images').getPublicUrl(filePath)
+  
+      const { data: urlData } = supabase
+        .storage
+        .from('pattern-images')
+        .getPublicUrl(filePath)
+  
       imageUrl = urlData.publicUrl
     }
-
-    const { error } = await supabase.from('patterns').insert([{ ...form, image_url: imageUrl }])
-    if (error) return console.error('Supabase insert error:', error.message)
-
+  
+    const { error } = await supabase
+      .from('patterns')
+      .insert([{ ...form, image_url: imageUrl }])
+  
+    setLoading(false)
+  
+    if (error) {
+      console.error('Supabase insert error:', error.message)
+      alert('Failed to add pattern.')
+      return
+    }
+  
     alert('Pattern added!')
     setForm({ name: '', designer: '', type: '', tags: '', notes: '' })
     setImageFile(null)
@@ -115,9 +137,10 @@ export default function AddPattern() {
       )}
       <button
         onClick={handleAdd}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        disabled={loading}
+        className={`px-4 py-2 rounded text-white ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
       >
-        Add Pattern
+        {loading ? 'Adding...' : 'Add Pattern'}
       </button>
     </div>
   )
